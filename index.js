@@ -7,7 +7,7 @@ const { getIndex } = require('./src/indexes')
 const { v4 } = require('uuid')
 
 const createServer = (options) => {
-  const path = options.path || process.env.PWD
+  const path = options.path || process.cwd()
   const app = express()
 
   app.use(express.json())

@@ -17,8 +17,8 @@ if (argv.help) {
 } else {
   const app = require('./')
 
-  const listener = app(argv).listen(argv.port || 9200, () => {
+  const listener = app(argv).listen(argv.port || 9200, '0.0.0.0', () => {
     const address = listener.address()
-    console.log('Listening at http://localhost:%s', address.port)
+    console.log('Listening at http://0.0.0.0:%s', address.port)
   })
 }

@@ -3,16 +3,16 @@ const si = require('search-index')
 const path = require('path')
 const level = require('level')
 
-const indices = {}
+const indexes = {}
 
 module.exports.getIndex = (indexName, storePath) => {
-  const index = indices[indexName]
+  const index = indexes[indexName]
 
   if (!index) {
-    indices[indexName] = si({
+    indexes[indexName] = si({
       store: level(path.join(storePath, '.algolite', indexName), { valueEncoding: 'json' })
     })
   }
 
-  return indices[indexName]
+  return indexes[indexName]
 }
