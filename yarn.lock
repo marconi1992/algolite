@@ -1659,12 +1659,6 @@ node-pre-gyp@^0.10.0:
     semver "^5.3.0"
     tar "^4"
 
-node-sql-parser@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/node-sql-parser/-/node-sql-parser-1.0.0.tgz#3340af4cee73d2ed6caa87448a8a12d727ff498b"
-  dependencies:
-    has "^1.0.3"
-
 nodemon@^1.18.9:
   version "1.18.9"
   resolved "https://registry.yarnpkg.com/nodemon/-/nodemon-1.18.9.tgz#90b467efd3b3c81b9453380aeb2a2cba535d0ead"
@@ -1892,6 +1886,10 @@ path-type@^2.0.0:
   resolved "https://registry.yarnpkg.com/path-type/-/path-type-2.0.0.tgz#f012ccb8415b7096fc2daa1054c3d72389594c73"
   dependencies:
     pify "^2.0.0"
+
+pegjs@^0.10.0:
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/pegjs/-/pegjs-0.10.0.tgz#cf8bafae6eddff4b5a7efb185269eaaf4610ddbd"
 
 pify@^2.0.0:
   version "2.3.0"

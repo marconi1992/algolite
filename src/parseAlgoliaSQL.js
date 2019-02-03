@@ -1,17 +1,15 @@
-const { Parser } = require('node-sql-parser')
-
-const parser = new Parser()
+const parser = require('../algoliaDSLParser')
 
 const buildSearchExpression = (rule, db) => {
   const { OR, AND } = db
-  const { operator, left, right } = rule
-  if (operator === '=') {
-    return `${left.column}:${right.column}`
-  } else if (operator === 'OR') {
+  const { token, key, value, left, right } = rule
+  if (token === 'MATCH') {
+    return `${key}:${value.value}`
+  } else if (token === 'OR') {
     const leftExpression = buildSearchExpression(left, db)
     const rightExpression = buildSearchExpression(right, db)
     return OR(leftExpression, rightExpression)
-  } else if (operator === 'AND') {
+  } else if (token === 'AND') {
     const leftExpression = buildSearchExpression(left, db)
     const rightExpression = buildSearchExpression(right, db)
     return AND(leftExpression, rightExpression)
@@ -19,11 +17,7 @@ const buildSearchExpression = (rule, db) => {
 }
 
 module.exports = (db, sql) => {
-  let sqlToProcess = sql
-  sqlToProcess = sqlToProcess.replace(/:/g, '=')
-  sqlToProcess = `SELECT * FROM algolia WHERE ${sqlToProcess}`
+  const ast = parser.parse(sql)
 
-  const ast = parser.sqlToAst(sqlToProcess)
-
-  return buildSearchExpression(ast.where, db)
+  return buildSearchExpression(ast, db)
 }
