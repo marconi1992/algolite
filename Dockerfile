@@ -4,8 +4,8 @@ WORKDIR /algolite
 
 COPY  ./ /algolite
 
-RUN mkdir .algolite && yarn
+RUN mkdir -p .algolite
 
 EXPOSE 9200
 
-CMD [ "node", "cli.js" ]
+CMD [ "npm", "run", "start:container" ]

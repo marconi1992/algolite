@@ -5,7 +5,9 @@
   "bin": "cli.js",
   "license": "MIT",
   "scripts": {
-    "generate:dsl-parser": "pegjs -o algoliaDSLParser.js algoliaDSL.pegjs"
+    "generate:dsl-parser": "pegjs -o algoliaDSLParser.js algoliaDSL.pegjs",
+    "prestart:container": "npm i && npm run generate:dsl-parser",
+    "start:container": "node cli.js"
   },
   "dependencies": {
     "express": "^4.16.4",
