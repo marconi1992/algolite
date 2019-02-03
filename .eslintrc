@@ -1,0 +1,12 @@
+{
+  "extends": "standard",
+  "plugins": [
+    "import",
+    "node",
+    "promise"
+  ],
+  "env": {
+    "jest": true,
+    "node": true
+  }
+}
