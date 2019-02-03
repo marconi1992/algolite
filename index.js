@@ -33,6 +33,8 @@ const createServer = (options) => {
 
     const hits = result.map((item) => {
       const { obj } = item
+      obj.objectID = obj._id
+      delete obj._id
       return obj
     })
     return res.json({
@@ -61,8 +63,14 @@ const createServer = (options) => {
     const { objectID } = req.params
 
     const db = getIndex(indexName, path)
+    try {
+      await db.DELETE([objectID])
+    } catch (error) {
+      if (!(error instanceof NotFoundError)) {
+        res.status(500).end()
+      }
+    }
 
-    await db.DELETE([objectID])
     await db.PUT([{
       _id: objectID,
       ...body
