@@ -1,13 +1,13 @@
 # Algolite
 An Implementation of Algolia to emulate its REST API on your local machine or CI environments in order to speed up your development and testing cycles.
 
-# Installation
+## Installation
 
 ```
 npm run -g algolite
 ```
 
-# Example
+## Example
 
 ```
 $ algolite --help
@@ -42,4 +42,10 @@ await index.addObject({
 })
 
 const result = await index.search('Algolia')
+```
+
+## Docker Image
+
+```
+docker run --rm -p 9200:9200 --name algolite marconi1992/algolite:0.1.1
 ```
