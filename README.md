@@ -1,5 +1,5 @@
 # Algolite
-An Implementation of Algolia to emulate its REST API on your local machine or CI environments in order to speed up your development and testing cycles.
+An Implementation of [Algolia](https://www.algolia.com/) to emulate its REST API on your local machine or CI environments in order to speed up your development and testing cycles.
 
 ## Installation
 
