@@ -2,7 +2,7 @@
   "name": "algolite",
   "version": "0.1.0",
   "main": "index.js",
-  "bin": "clie.js",
+  "bin": "cli.js",
   "license": "MIT",
   "dependencies": {
     "express": "^4.16.4",
