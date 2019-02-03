@@ -3,14 +3,14 @@ var argv = require('minimist')(process.argv.slice(2))
 if (argv.help) {
   console.log([
     '',
-    'Usage: algolite [--port <port>]',
+    'Usage: algolite [--port <port>] [--path <path>]',
     '',
-    'A Algolia http server',
+    'An Algolia REST API Implementation',
     '',
     'Options:',
     '--help                Display this help message and exit',
     '--port <port>         The port to listen on (default: 9200)',
-    '--path <port>         The path to use for the LevelDB store (Your project folder)',
+    '--path <path>         The path to use for the LevelDB store (Your project folder)',
     '',
     'Report bugs at github.com/marconi1992/algolite/issues'
   ].join('\n'))

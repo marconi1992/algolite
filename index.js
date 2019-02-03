@@ -2,7 +2,7 @@ const express = require('express')
 const querystring = require('querystring')
 const { NotFoundError } = require('level-errors')
 const parseAlgoliaSQL = require('./src/parseAlgoliaSQL')
-const { getIndex } = require('./src/indices')
+const { getIndex } = require('./src/indexes')
 
 const { v4 } = require('uuid')
 
