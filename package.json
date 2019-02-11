@@ -4,6 +4,10 @@
   "main": "index.js",
   "bin": "cli.js",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:marconi1992/algolite.git"
+  },
   "scripts": {
     "generate:dsl-parser": "pegjs -o algoliaDSLParser.js algoliaDSL.pegjs",
     "prestart:container": "npm i && npm run generate:dsl-parser",
