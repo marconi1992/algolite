@@ -66,7 +66,7 @@ const createServer = (options) => {
     try {
       await db.DELETE([objectID])
     } catch (error) {
-      if (!(error instanceof NotFoundError)) {
+      if (!error.notFound) {
         return res.status(500).end()
       }
     }
@@ -89,7 +89,7 @@ const createServer = (options) => {
     try {
       await db.DELETE([objectID])
     } catch (error) {
-      if (!(error instanceof NotFoundError)) {
+      if (!error.notFound) {
         res.status(500).end()
       }
     }
