@@ -1,8 +1,7 @@
 const express = require('express')
 const querystring = require('querystring')
-const { NotFoundError } = require('level-errors')
 const parseAlgoliaSQL = require('./src/parseAlgoliaSQL')
-const { getIndex } = require('./src/indexes')
+const { getIndex, existIndex } = require('./src/indexes')
 
 const { v4 } = require('uuid')
 
@@ -93,6 +92,23 @@ const createServer = (options) => {
         res.status(500).end()
       }
     }
+
+    return res.status(200).json({
+      taskID: 'algolite-task-id'
+    })
+  })
+
+  app.post('/1/indexes/:indexName/clear', async (req, res) => {
+    const { indexName } = req.params
+
+    if (!existIndex(indexName, path)) {
+      return res.status(400).end()
+    }
+
+    const db = getIndex(indexName, path)
+    const result = await db.INDEX.GET('')
+    const ids = result.map(obj => obj._id)
+    await db.INDEX.DELETE(ids)
 
     return res.status(200).json({
       taskID: 'algolite-task-id'

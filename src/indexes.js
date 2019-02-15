@@ -21,3 +21,9 @@ module.exports.getIndex = (indexName, storePath) => {
 
   return indexes[indexName]
 }
+
+module.exports.existIndex = (indexName, storePath) => {
+  const basePath = path.join(storePath, '.algolite', indexName)
+
+  return fs.existsSync(basePath)
+}
