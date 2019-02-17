@@ -52,6 +52,7 @@ const createServer = (options) => {
     }])
 
     return res.status(201).json({
+      createdAt: (new Date()).toISOString(),
       taskID: 'algolite-task-id',
       objectID: _id
     })
@@ -75,7 +76,8 @@ const createServer = (options) => {
       ...body
     }])
 
-    return res.status(200).json({
+    return res.status(201).json({
+      updatedAt: (new Date()).toISOString(),
       taskID: 'algolite-task-id',
       objectID
     })
@@ -94,6 +96,38 @@ const createServer = (options) => {
     }
 
     return res.status(200).json({
+      deletedAt: (new Date()).toISOString(),
+      taskID: 'algolite-task-id',
+      objectID
+    })
+  })
+
+  app.post('/1/indexes/:indexName/deleteByQuery', async (req, res) => {
+    const { body, params: { indexName } } = req
+    const { params: queryParams } = body
+
+    const { facetFilters } = querystring.parse(queryParams)
+
+    const db = getIndex(indexName, path)
+
+    const searchExp = []
+    if (facetFilters) {
+      searchExp.push(parseAlgoliaSQL(db, facetFilters))
+    }
+
+    if (searchExp.length === 0) {
+      return res.status(400).json({
+        message: 'DeleteByQuery endpoint only supports tagFilters, facetFilters, numericFilters and geoQuery condition',
+        status: 400
+      })
+    }
+
+    const result = await db.SEARCH(...searchExp)
+    const ids = result.map(obj => obj._id)
+    await db.INDEX.DELETE(ids)
+
+    return res.status(201).json({
+      updatedAt: (new Date()).toISOString(),
       taskID: 'algolite-task-id'
     })
   })
