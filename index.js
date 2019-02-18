@@ -20,8 +20,8 @@ const createServer = (options) => {
     const { query, filters } = querystring.parse(queryParams)
 
     const searchExp = []
-    if (query) {
-      searchExp.push(query)
+    if (query !== undefined) {
+      searchExp.push(!query ? '*' : query)
     }
 
     if (filters) {
@@ -36,8 +36,11 @@ const createServer = (options) => {
       delete obj._id
       return obj
     })
+
     return res.json({
-      hits
+      hits,
+      params: queryParams || '',
+      query: query || ''
     })
   })
 
