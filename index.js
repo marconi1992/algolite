@@ -28,6 +28,10 @@ const createServer = (options) => {
       searchExp.push(parseAlgoliaSQL(db, filters))
     }
 
+    if (facetFilters) {
+      searchExp.push(parseAlgoliaSQL(db, facetFilters.map(f => Array.isArray(f) ? `(${f.join(' OR ')})` : f).join(' AND ')))
+    }
+
     const result = await db.SEARCH(...searchExp)
 
     const hits = result.map((item) => {
