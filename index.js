@@ -17,7 +17,7 @@ const createServer = (options) => {
 
     const db = getIndex(indexName, path)
 
-    const { query, filters } = querystring.parse(queryParams)
+    const { query, filters, facetFilters } = queryParams ? querystring.parse(queryParams) : body
 
     const searchExp = []
     if (query !== undefined) {
