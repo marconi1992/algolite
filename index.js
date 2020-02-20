@@ -61,6 +61,32 @@ const createServer = (options) => {
     })
   })
 
+  app.post('/1/indexes/:indexName/batch', async (req, res) => {
+    const { body, params: { indexName } } = req
+    const objects = []
+
+    for (const request of body.requests) {
+      switch (request.action) {
+        case 'updateObject':
+          request.body._id = request.body.objectID
+          delete request.body.objectID
+          objects.push(request.body)
+          break
+        default:
+          // not supported
+          return res.status(400).end()
+      }
+    }
+
+    const db = getIndex(indexName, path)
+    await db.PUT(objects)
+
+    return res.status(201).json({
+      taskID: 'algolite-task-id',
+      objectIDs: objects.map(o => o._id)
+    })
+  })
+
   app.put('/1/indexes/:indexName/:objectID', async (req, res) => {
     const { body, params: { indexName } } = req
     const { objectID } = req.params
