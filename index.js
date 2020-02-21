@@ -63,15 +63,21 @@ const createServer = (options) => {
 
   app.post('/1/indexes/:indexName/batch', async (req, res) => {
     const { body, params: { indexName } } = req
-    const objects = []
+    const puts = []
+    const deletes = []
 
     for (const request of body.requests) {
       switch (request.action) {
         case 'updateObject':
           request.body._id = request.body.objectID
           delete request.body.objectID
-          objects.push(request.body)
+          puts.push(request.body)
           break
+
+        case 'deleteObject':
+          deletes.push(request.body.objectID)
+          break
+
         default:
           // not supported
           return res.status(400).end()
@@ -79,11 +85,16 @@ const createServer = (options) => {
     }
 
     const db = getIndex(indexName, path)
-    await db.PUT(objects)
+    if (puts.length) {
+      await db.PUT(puts)
+    }
+    if (deletes.length) {
+      await db.DELETE(deletes)
+    }
 
     return res.status(201).json({
       taskID: 'algolite-task-id',
-      objectIDs: objects.map(o => o._id)
+      objectIDs: body.requests.map(r => r.body.objectID)
     })
   })
 
