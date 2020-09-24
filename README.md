@@ -27,18 +27,17 @@ Once running any algolia client can be used.
 ```javascript
 
 const client = algoliasearch('app-id', 'api-key', {
-  protocol: 'http:',
-  hosts: {
-    read: ['localhost:9200'],
-    write: ['localhost:9200']
-  }
+  hosts: [{
+    protocol: 'http',
+    url: 'localhost:9200'
+  }]
 })
 
 const index = client.initIndex('entries');
 
-await index.addObject({ 
+await index.addObject({
   title: 'Algolia 2019',
-  contentType: 'events' 
+  contentType: 'events'
 })
 
 const result = await index.search('Algolia')
