@@ -17,7 +17,7 @@ const createServer = (options) => {
 
     const db = getIndex(indexName, path)
 
-    const { query, filters } = querystring.parse(queryParams)
+    const { query, filters, facetFilters } = queryParams ? querystring.parse(queryParams) : body
 
     const searchExp = []
     if (query !== undefined) {
@@ -26,6 +26,10 @@ const createServer = (options) => {
 
     if (filters) {
       searchExp.push(parseAlgoliaSQL(db, filters))
+    }
+
+    if (facetFilters) {
+      searchExp.push(parseAlgoliaSQL(db, facetFilters.map(f => Array.isArray(f) ? `(${f.join(' OR ')})` : f).join(' AND ')))
     }
 
     const result = await db.SEARCH(...searchExp)
