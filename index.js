@@ -17,7 +17,7 @@ const createServer = (options) => {
 
     const db = getIndex(indexName, path)
 
-    const { query, filters, facetFilters } = queryParams ? querystring.parse(queryParams) : body
+    const { query, filters, facetFilters, page = 0, hitsPerPage = 20 } = queryParams ? querystring.parse(queryParams) : body
 
     const searchExp = []
     if (query !== undefined) {
@@ -33,6 +33,8 @@ const createServer = (options) => {
     }
 
     const result = await db.SEARCH(...searchExp)
+    const nbHits = result.length;
+    const nbPages = Math.floor(nbHits / (page + 1))
 
     const hits = result.map((item) => {
       const { obj } = item
@@ -41,10 +43,17 @@ const createServer = (options) => {
       return obj
     })
 
+    const from = (page * hitsPerPage);
+    const end = from + hitsPerPage;
+
     return res.json({
-      hits,
+      hits: hits.slice(from, end),
       params: queryParams || '',
-      query: query || ''
+      query: query || '',
+      page,
+      nbHits,
+      nbPages,
+      hitsPerPage,
     })
   })
 
