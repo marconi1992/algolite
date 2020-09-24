@@ -61,6 +61,43 @@ const createServer = (options) => {
     })
   })
 
+  app.post('/1/indexes/:indexName/batch', async (req, res) => {
+    const { body, params: { indexName } } = req
+    const puts = []
+    const deletes = []
+
+    for (const request of body.requests) {
+      switch (request.action) {
+        case 'updateObject':
+          request.body._id = request.body.objectID
+          delete request.body.objectID
+          puts.push(request.body)
+          break
+
+        case 'deleteObject':
+          deletes.push(request.body.objectID)
+          break
+
+        default:
+          // not supported
+          return res.status(400).end()
+      }
+    }
+
+    const db = getIndex(indexName, path)
+    if (puts.length) {
+      await db.PUT(puts)
+    }
+    if (deletes.length) {
+      await db.DELETE(deletes)
+    }
+
+    return res.status(201).json({
+      taskID: 'algolite-task-id',
+      objectIDs: body.requests.map(r => r.body.objectID)
+    })
+  })
+
   app.put('/1/indexes/:indexName/:objectID', async (req, res) => {
     const { body, params: { indexName } } = req
     const { objectID } = req.params
