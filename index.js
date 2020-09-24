@@ -9,7 +9,8 @@ const { getIndex, existIndex } = require('./src/indexes')
 const wrapAsyncMiddleware = asyncMiddleware => (req, res, next) => {
   return Promise.resolve(asyncMiddleware(req, res, next))
     .catch((error) => {
-      res.status(500).json({
+      console.error(error)
+      return res.status(400).json({
         'message': 'Internal server error',
         'status': 500
       })
@@ -66,7 +67,7 @@ const createServer = (options) => {
       page,
       nbHits,
       nbPages,
-      hitsPerPage,
+      hitsPerPage
     })
   }))
 
