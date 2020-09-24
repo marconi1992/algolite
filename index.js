@@ -3,6 +3,19 @@ const querystring = require('querystring')
 const parseAlgoliaSQL = require('./src/parseAlgoliaSQL')
 const { getIndex, existIndex } = require('./src/indexes')
 
+/**
+ * Middleware for catching errors in Api routes
+ */
+const wrapAsyncMiddleware = asyncMiddleware => (req, res, next) => {
+  return Promise.resolve(asyncMiddleware(req, res, next))
+    .catch((error) => {
+      res.status(500).json({
+        'message': 'Internal server error',
+        'status': 500
+      })
+    })
+}
+
 const { v4 } = require('uuid')
 
 const createServer = (options) => {
@@ -11,7 +24,7 @@ const createServer = (options) => {
 
   app.use(express.json())
 
-  app.post('/1/indexes/:indexName/query', async (req, res) => {
+  app.post('/1/indexes/:indexName/query', wrapAsyncMiddleware(async (req, res) => {
     const { body, params: { indexName } } = req
     const { params: queryParams } = body
 
@@ -33,8 +46,8 @@ const createServer = (options) => {
     }
 
     const result = await db.SEARCH(...searchExp)
-    const nbHits = result.length;
-    const nbPages = Math.floor(nbHits / (page + 1))
+    const nbHits = result.length
+    const nbPages = Math.floor(nbHits / (hitsPerPage + 1))
 
     const hits = result.map((item) => {
       const { obj } = item
@@ -43,8 +56,8 @@ const createServer = (options) => {
       return obj
     })
 
-    const from = (page * hitsPerPage);
-    const end = from + hitsPerPage;
+    const from = (page * hitsPerPage)
+    const end = from + hitsPerPage
 
     return res.json({
       hits: hits.slice(from, end),
@@ -55,9 +68,9 @@ const createServer = (options) => {
       nbPages,
       hitsPerPage,
     })
-  })
+  }))
 
-  app.post('/1/indexes/:indexName', async (req, res) => {
+  app.post('/1/indexes/:indexName', wrapAsyncMiddleware(async (req, res) => {
     const { body, params: { indexName } } = req
     const _id = v4()
 
@@ -72,9 +85,9 @@ const createServer = (options) => {
       taskID: 'algolite-task-id',
       objectID: _id
     })
-  })
+  }))
 
-  app.post('/1/indexes/:indexName/batch', async (req, res) => {
+  app.post('/1/indexes/:indexName/batch', wrapAsyncMiddleware(async (req, res) => {
     const { body, params: { indexName } } = req
     const puts = []
     const deletes = []
@@ -109,9 +122,9 @@ const createServer = (options) => {
       taskID: 'algolite-task-id',
       objectIDs: body.requests.map(r => r.body.objectID)
     })
-  })
+  }))
 
-  app.put('/1/indexes/:indexName/:objectID', async (req, res) => {
+  app.put('/1/indexes/:indexName/:objectID', wrapAsyncMiddleware(async (req, res) => {
     const { body, params: { indexName } } = req
     const { objectID } = req.params
 
@@ -134,9 +147,9 @@ const createServer = (options) => {
       taskID: 'algolite-task-id',
       objectID
     })
-  })
+  }))
 
-  app.delete('/1/indexes/:indexName/:objectID', async (req, res) => {
+  app.delete('/1/indexes/:indexName/:objectID', wrapAsyncMiddleware(async (req, res) => {
     const { objectID, indexName } = req.params
 
     const db = getIndex(indexName, path)
@@ -153,9 +166,9 @@ const createServer = (options) => {
       taskID: 'algolite-task-id',
       objectID
     })
-  })
+  }))
 
-  app.post('/1/indexes/:indexName/deleteByQuery', async (req, res) => {
+  app.post('/1/indexes/:indexName/deleteByQuery', wrapAsyncMiddleware(async (req, res) => {
     const { body, params: { indexName } } = req
     const { params: queryParams } = body
 
@@ -183,9 +196,9 @@ const createServer = (options) => {
       updatedAt: (new Date()).toISOString(),
       taskID: 'algolite-task-id'
     })
-  })
+  }))
 
-  app.post('/1/indexes/:indexName/clear', async (req, res) => {
+  app.post('/1/indexes/:indexName/clear', wrapAsyncMiddleware(async (req, res) => {
     const { indexName } = req.params
 
     if (!existIndex(indexName, path)) {
@@ -200,7 +213,7 @@ const createServer = (options) => {
     return res.status(200).json({
       taskID: 'algolite-task-id'
     })
-  })
+  }))
 
   return app
 }
