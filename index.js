@@ -23,7 +23,7 @@ const createServer = (options) => {
   const path = options.path || process.cwd()
   const app = express()
 
-  app.use(express.json())
+  app.use(express.json({ type: '*/*' }))
 
   app.post('/1/indexes/:indexName/query', wrapAsyncMiddleware(async (req, res) => {
     const { body, params: { indexName } } = req
