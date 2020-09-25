@@ -48,7 +48,7 @@ const createServer = (options) => {
 
     const result = await db.SEARCH(...searchExp)
     const nbHits = result.length
-    const nbPages = Math.floor(nbHits / (hitsPerPage + 1))
+    const nbPages = Math.floor(nbHits / hitsPerPage)
 
     const hits = result.map((item) => {
       const { obj } = item
@@ -57,8 +57,8 @@ const createServer = (options) => {
       return obj
     })
 
-    const from = (page * hitsPerPage)
-    const end = from + hitsPerPage
+    const from = page * hitsPerPage
+    const end = (from + hitsPerPage) - 1
 
     return res.json({
       hits: hits.slice(from, end),
