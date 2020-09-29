@@ -1,7 +1,7 @@
 const express = require('express')
 const querystring = require('querystring')
 const parseAlgoliaSQL = require('./src/parseAlgoliaSQL')
-const { getIndex, existIndex } = require('./src/indexes')
+const { getIndex, existIndex, initExistingIndexes } = require('./src/indexes')
 
 /**
  * Middleware for catching errors in Api routes
@@ -21,6 +21,12 @@ const { v4 } = require('uuid')
 
 const createServer = (options) => {
   const path = options.path || process.cwd()
+  // Init indexes as background task
+  initExistingIndexes(path).catch((err) => {
+    console.log('Can not initialized indexes')
+    console.error(err)
+  })
+
   const app = express()
 
   app.use(express.json({ type: '*/*' }))
@@ -29,7 +35,7 @@ const createServer = (options) => {
     const { body, params: { indexName } } = req
     const { params: queryParams } = body
 
-    const db = getIndex(indexName, path)
+    const db = await getIndex(indexName, path)
 
     const { query, filters, facetFilters, page = 0, hitsPerPage = 20 } = queryParams ? querystring.parse(queryParams) : body
 
@@ -75,7 +81,7 @@ const createServer = (options) => {
     const { body, params: { indexName } } = req
     const _id = v4()
 
-    const db = getIndex(indexName, path)
+    const db = await getIndex(indexName, path)
     await db.PUT([{
       _id,
       ...body
@@ -111,7 +117,7 @@ const createServer = (options) => {
       }
     }
 
-    const db = getIndex(indexName, path)
+    const db = await getIndex(indexName, path)
     if (puts.length) {
       await db.PUT(puts)
     }
@@ -129,7 +135,7 @@ const createServer = (options) => {
     const { body, params: { indexName } } = req
     const { objectID } = req.params
 
-    const db = getIndex(indexName, path)
+    const db = await getIndex(indexName, path)
     try {
       await db.DELETE([objectID])
     } catch (error) {
@@ -153,7 +159,7 @@ const createServer = (options) => {
   app.delete('/1/indexes/:indexName/:objectID', wrapAsyncMiddleware(async (req, res) => {
     const { objectID, indexName } = req.params
 
-    const db = getIndex(indexName, path)
+    const db = await getIndex(indexName, path)
     try {
       await db.DELETE([objectID])
     } catch (error) {
@@ -175,7 +181,7 @@ const createServer = (options) => {
 
     const { facetFilters } = querystring.parse(queryParams)
 
-    const db = getIndex(indexName, path)
+    const db = await getIndex(indexName, path)
 
     const searchExp = []
     if (facetFilters) {
@@ -206,7 +212,7 @@ const createServer = (options) => {
       return res.status(400).end()
     }
 
-    const db = getIndex(indexName, path)
+    const db = await getIndex(indexName, path)
     const result = await db.INDEX.GET('')
     const ids = result.map(obj => obj._id)
     await db.INDEX.DELETE(ids)
