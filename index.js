@@ -17,6 +17,13 @@ const wrapAsyncMiddleware = asyncMiddleware => (req, res, next) => {
     })
 }
 
+const corsMiddleware = (req, res, next) => {
+  res.set({
+    'Access-Control-Allow-Origin': '*'
+  })
+  next()
+}
+
 const { v4 } = require('uuid')
 
 const createServer = (options) => {
@@ -30,6 +37,7 @@ const createServer = (options) => {
   const app = express()
 
   app.use(express.json({ type: '*/*' }))
+  app.use(corsMiddleware);
 
   app.post('/1/indexes/:indexName/query', wrapAsyncMiddleware(async (req, res) => {
     const { body, params: { indexName } } = req
