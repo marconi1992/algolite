@@ -54,7 +54,7 @@ const createServer = (options) => {
 
     const result = await db.SEARCH(...searchExp)
     const nbHits = result.length
-    const nbPages = Math.floor(nbHits / hitsPerPage)
+    const nbPages = Math.ceil(nbHits / hitsPerPage)
 
     const hits = result.map((item) => {
       const { obj } = item
