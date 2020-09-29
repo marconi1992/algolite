@@ -1,7 +1,7 @@
 const express = require('express')
 const querystring = require('querystring')
 const parseAlgoliaSQL = require('./src/parseAlgoliaSQL')
-const { getIndex, existIndex, initExistingIndexes } = require('./src/indexes')
+const { getIndex, existIndex, initExistingIndexes, getIndexName } = require('./src/indexes')
 
 /**
  * Middleware for catching errors in Api routes
@@ -37,12 +37,12 @@ const createServer = (options) => {
   const app = express()
 
   app.use(express.json({ type: '*/*' }))
-  app.use(corsMiddleware);
+  app.use(corsMiddleware)
 
   app.post('/1/indexes/:indexName/query', wrapAsyncMiddleware(async (req, res) => {
-    const { body, params: { indexName } } = req
+    const { sortAttribute, sortDesc, indexName } = getIndexName(req)
+    const { body } = req
     const { params: queryParams } = body
-
     const db = await getIndex(indexName, path)
 
     const { query, filters, facetFilters, page = 0, hitsPerPage = 20 } = queryParams ? querystring.parse(queryParams) : body
@@ -64,12 +64,22 @@ const createServer = (options) => {
     const nbHits = result.length
     const nbPages = Math.ceil(nbHits / hitsPerPage)
 
-    const hits = result.map((item) => {
+    let hits = result.map((item) => {
       const { obj } = item
       obj.objectID = obj._id
       delete obj._id
       return obj
     })
+    if (sortAttribute) {
+      hits = hits.sort((item1, item2) => {
+        const item1Attr = item1[sortAttribute]
+        const item2Attr = item2[sortAttribute]
+        if (sortDesc) {
+          return item2Attr >= item1Attr ? 1 : -1
+        }
+        return item2Attr <= item1Attr ? 1 : -1
+      })
+    }
 
     const from = page * hitsPerPage
     const end = (from + hitsPerPage) - 1
@@ -86,7 +96,8 @@ const createServer = (options) => {
   }))
 
   app.post('/1/indexes/:indexName', wrapAsyncMiddleware(async (req, res) => {
-    const { body, params: { indexName } } = req
+    const { indexName } = getIndexName(req)
+    const { body } = req
     const _id = v4()
 
     const db = await getIndex(indexName, path)
@@ -103,7 +114,8 @@ const createServer = (options) => {
   }))
 
   app.post('/1/indexes/:indexName/batch', wrapAsyncMiddleware(async (req, res) => {
-    const { body, params: { indexName } } = req
+    const { indexName } = getIndexName(req)
+    const { body } = req
     const puts = []
     const deletes = []
 
@@ -140,7 +152,8 @@ const createServer = (options) => {
   }))
 
   app.put('/1/indexes/:indexName/:objectID', wrapAsyncMiddleware(async (req, res) => {
-    const { body, params: { indexName } } = req
+    const { indexName } = getIndexName(req)
+    const { body } = req
     const { objectID } = req.params
 
     const db = await getIndex(indexName, path)
@@ -165,7 +178,8 @@ const createServer = (options) => {
   }))
 
   app.delete('/1/indexes/:indexName/:objectID', wrapAsyncMiddleware(async (req, res) => {
-    const { objectID, indexName } = req.params
+    const { indexName } = getIndexName(req)
+    const { objectID } = req.params
 
     const db = await getIndex(indexName, path)
     try {
@@ -184,7 +198,8 @@ const createServer = (options) => {
   }))
 
   app.post('/1/indexes/:indexName/deleteByQuery', wrapAsyncMiddleware(async (req, res) => {
-    const { body, params: { indexName } } = req
+    const { indexName } = getIndexName(req)
+    const { body } = req
     const { params: queryParams } = body
 
     const { facetFilters } = querystring.parse(queryParams)
@@ -214,7 +229,7 @@ const createServer = (options) => {
   }))
 
   app.post('/1/indexes/:indexName/clear', wrapAsyncMiddleware(async (req, res) => {
-    const { indexName } = req.params
+    const { indexName } = getIndexName(req)
 
     if (!existIndex(indexName, path)) {
       return res.status(400).end()

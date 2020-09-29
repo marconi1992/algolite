@@ -5,7 +5,7 @@ const level = require('level')
 
 const indexes = {}
 
-const initIndex = async (basePath, indexName) => {
+const initIndex = async (indexName, basePath) => {
   const indexPath = path.join(basePath, indexName)
   const db = await level(indexPath, { valueEncoding: 'json' })
   indexes[indexName] = si({
@@ -21,7 +21,7 @@ module.exports.getIndex = async (indexName, storePath) => {
   }
 
   if (!index) {
-    await initIndex(indexName)
+    await initIndex(indexName, basePath)
   }
 
   return indexes[indexName]
@@ -39,7 +39,31 @@ module.exports.initExistingIndexes = async (storePath) => {
   }
   const folders = fs.readdirSync(basePath)
   for (const folder of folders) {
-    await initIndex(basePath, folder)
+    await initIndex(folder, basePath)
+  }
+}
+
+module.exports.getIndexName = (req) => {
+  let { params: { indexName } } = req
+  let sortAttribute
+  let sortDesc
+  /*
+     * Hack to get proper sorting
+     * Because in Algolia you can sort just by using another replica of index,
+     * we try to parse the sorting from index name. We guess that user is using index name in format
+     * INDEX_sortFiled_asc or INDEX_sortFiled_desc
+     */
+  const indexNameSplit = indexName.split('_')
+  const indexWordCount = indexNameSplit.length
+  if (indexNameSplit[indexWordCount - 1] === 'asc' || indexNameSplit[indexWordCount - 1] === 'desc') {
+    indexName = indexNameSplit.slice(0, -2).join('_')
+    sortAttribute = indexNameSplit[indexWordCount - 2]
+    sortDesc = indexNameSplit[indexWordCount - 1] === 'desc'
+  }
+  return {
+    indexName,
+    sortAttribute,
+    sortDesc
   }
 }
 
