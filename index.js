@@ -142,7 +142,15 @@ const createServer = (options) => {
       await db.PUT(puts)
     }
     if (deletes.length) {
-      await db.DELETE(deletes)
+      try {
+        await db.DELETE(deletes)
+      } catch (error) {
+        if (error.notFound) {
+          console.log('WARNING: Object not found!')
+        } else {
+          throw error
+        }
+      }
     }
 
     return res.status(201).json({
