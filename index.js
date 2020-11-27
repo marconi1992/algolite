@@ -36,7 +36,7 @@ const createServer = (options) => {
 
   const app = express()
 
-  app.use(express.json({ type: '*/*' }))
+  app.use(express.json({ type: '*/*', limit: '50mb' }))
   app.use(corsMiddleware)
 
   app.post('/1/indexes/:indexName/query', wrapAsyncMiddleware(async (req, res) => {
