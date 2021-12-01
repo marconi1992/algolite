@@ -4,7 +4,7 @@ An Implementation of [Algolia](https://www.algolia.com/) to emulate its REST API
 ## Installation
 
 ```
-npm run -g algolite
+npm install -g algolite
 ```
 
 ## Example
