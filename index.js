@@ -39,6 +39,52 @@ const createServer = (options) => {
   app.use(express.json({ type: '*/*', limit: '50mb' }))
   app.use(corsMiddleware)
 
+  // See docs at https://www.algolia.com/doc/api-reference/api-methods/get-related-products/
+  // This endpoint mimics the recommendation engine of Algolia.
+  // It returns `maxRecommendations` objects from the index with top score (the queried item is ignored)
+  // Each object in the database must contain the following attributes as they need to be mapped
+  // to recommendation output
+  // - obj.featuredScore: number (used as _score)
+  // - obj._id (used as objectID)
+  // - obj.name (used as name)
+  app.post('/1/indexes/*/recommendations', wrapAsyncMiddleware(async (req, res) => {
+    const { body } = req
+    const { requests } = body;
+
+    const results = [];
+
+    if (requests && requests.length > 0) {
+      for (const request of requests) {
+        const  { indexName, objectID, maxRecommendations } = request;
+        const db = await getIndex(indexName, path);
+        const content = await db.SEARCH('*');
+        const objects = (content || [])
+          .map(object => ({
+            _id: object.obj._id,
+            name: object.obj.name,
+            featuredScore: object.obj.featuredScore,
+          }))
+          .filter(object => object._id !== objectID);
+          objects.sort((a, b) => (a.featuredScore > b.featuredScore) ? -1 : 1) // descending order
+
+        const hits = [];
+        for (let i = 0; i < Math.min(maxRecommendations, objects.length); i++) {
+          const object = objects[i];
+          hits.push({
+            // These 3 fields must be present on the object in the database
+            _score: object.featuredScore,
+            objectID: object._id,
+            name: object.name,
+          });
+        }
+
+        results.push({ hits });
+      }
+    }
+
+    return res.json({ results })
+  }));
+
   app.post('/1/indexes/:indexName/query', wrapAsyncMiddleware(async (req, res) => {
     const { sortAttribute, sortDesc, indexName } = getIndexName(req)
     const { body } = req
