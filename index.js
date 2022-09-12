@@ -68,7 +68,8 @@ const createServer = (options) => {
           objects.sort((a, b) => (a.featuredScore > b.featuredScore) ? -1 : 1) // descending order
 
         const hits = [];
-        for (let i = 0; i < Math.min(maxRecommendations, objects.length); i++) {
+        const numRecommendations = maxRecommendations > 0 ? Math.min(maxRecommendations, objects.length) : objects.length;
+        for (let i = 0; i < numRecommendations; i++) {
           const object = objects[i];
           hits.push({
             // These 3 fields must be present on the object in the database
