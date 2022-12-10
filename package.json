@@ -14,7 +14,7 @@
     "start:container": "node cli.js"
   },
   "dependencies": {
-    "express": "^4.16.4",
+    "express": "^4.17.3",
     "minimist": "^1.2.3",
     "search-index": "^1.0.1",
     "uuid": "^3.3.2"
