@@ -1,3 +1,4 @@
+const cors = require('cors')
 const express = require('express')
 const querystring = require('querystring')
 const parseAlgoliaSQL = require('./src/parseAlgoliaSQL')
@@ -17,13 +18,6 @@ const wrapAsyncMiddleware = asyncMiddleware => (req, res, next) => {
     })
 }
 
-const corsMiddleware = (req, res, next) => {
-  res.set({
-    'Access-Control-Allow-Origin': '*'
-  })
-  next()
-}
-
 const { v4 } = require('uuid')
 
 const createServer = (options) => {
@@ -37,7 +31,7 @@ const createServer = (options) => {
   const app = express()
 
   app.use(express.json({ type: '*/*', limit: '50mb' }))
-  app.use(corsMiddleware)
+  app.use(cors())
 
   // See docs at https://www.algolia.com/doc/api-reference/api-methods/get-related-products/
   // This endpoint mimics the recommendation engine of Algolia.
