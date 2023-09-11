@@ -31,7 +31,9 @@ const createServer = (options) => {
   const app = express()
 
   app.use(express.json({ type: '*/*', limit: '50mb' }))
-  app.use(cors())
+  app.use(cors({
+    allowedHeaders: '*'
+  }))
 
   // See docs at https://www.algolia.com/doc/api-reference/api-methods/get-related-products/
   // This endpoint mimics the recommendation engine of Algolia.
